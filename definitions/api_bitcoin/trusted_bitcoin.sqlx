@@ -10,11 +10,10 @@ WITH raw_data AS (
 )
 
 SELECT
-  -- O item é '[1769662279111, 457957.89]'
-  -- Pega o índice 0 (Timestamp)
+  -- $[0] é a Data (Timestamp)
   TIMESTAMP_MILLIS(CAST(JSON_VALUE(item, '$[0]') AS INT64)) as data_referencia,
   
-  -- Pega o índice 1 (Valor)
+  -- $[1] é o Valor
   CAST(JSON_VALUE(item, '$[1]') AS FLOAT64) as valor_brl,
   
   -- Metadados
@@ -24,5 +23,4 @@ SELECT
   CURRENT_TIMESTAMP() as data_processamento
 
 FROM raw_data,
--- JSON_EXTRACT_ARRAY transforma a lista gigante em várias linhas pequenas
 UNNEST(JSON_EXTRACT_ARRAY(prices)) as item
