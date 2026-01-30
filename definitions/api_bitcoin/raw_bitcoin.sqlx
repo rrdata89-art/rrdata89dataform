@@ -1,0 +1,19 @@
+config {
+  type: "operations",
+  schema: "raw",
+  name: "raw_bitcoin",
+  hasOutput: true
+}
+
+CREATE OR REPLACE EXTERNAL TABLE ${self()}
+(
+  prices JSON,
+  market_caps JSON,
+  total_volumes JSON,
+  _metadados JSON
+)
+OPTIONS (
+  format = 'JSON',
+  uris = ['gs://rrdata89_apis/raw/api_bitcoin/*'],
+  ignore_unknown_values = true
+);

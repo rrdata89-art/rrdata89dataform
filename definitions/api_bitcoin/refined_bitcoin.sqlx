@@ -1,0 +1,13 @@
+config {
+  type: "table",
+  schema: "refined",
+  name: "refined_bitcoin",
+  tags: ["bitcoin"]
+}
+
+SELECT
+  data_referencia,
+  valor_brl,
+  data_processamento
+FROM ${ref("trusted_bitcoin")}
+ORDER BY data_referencia DESC

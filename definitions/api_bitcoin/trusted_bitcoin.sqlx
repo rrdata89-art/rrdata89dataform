@@ -1,0 +1,26 @@
+config {
+  type: "table",
+  schema: "trusted",
+  name: "trusted_bitcoin",
+  tags: ["bitcoin"]
+}
+
+WITH raw_data AS (
+  SELECT prices, _metadados FROM ${ref("raw_bitcoin")}
+)
+
+SELECT
+  -- $[0] é a Data (Timestamp)
+  TIMESTAMP_MILLIS(CAST(JSON_VALUE(item, '$[0]') AS INT64)) as data_referencia,
+  
+  -- $[1] é o Valor
+  CAST(JSON_VALUE(item, '$[1]') AS FLOAT64) as valor_brl,
+  
+  -- Metadados
+  CAST(JSON_VALUE(_metadados, '$.data_ingestao') AS TIMESTAMP) as data_ingestao,
+  JSON_VALUE(_metadados, '$.origem') as origem,
+  
+  CURRENT_TIMESTAMP() as data_processamento
+
+FROM raw_data,
+UNNEST(JSON_EXTRACT_ARRAY(prices)) as item
