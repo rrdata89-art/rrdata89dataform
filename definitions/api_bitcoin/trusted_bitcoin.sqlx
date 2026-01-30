@@ -1,0 +1,39 @@
+config {
+  type: "incremental",
+  schema: "trusted",
+  name: "trusted_bitcoin",
+  tags: ["bitcoin"],
+  uniqueKey: ["data_referencia"],
+  assertions: {
+    nonNull: ["data_referencia", "valor_brl"],
+    rowConditions: ["valor_brl > 0"]
+  },
+  bigquery: {
+    partitionBy: "DATE(data_referencia)",
+    clusterBy: ["origem"]
+  }
+}
+
+WITH json_data AS (
+  SELECT prices, _metadados FROM ${ref("raw_bitcoin")}
+),
+
+flattened AS (
+  SELECT
+    TIMESTAMP_MILLIS(CAST(JSON_VALUE(item[0]) AS INT64)) as data_referencia,
+    CAST(JSON_VALUE(item[1]) AS FLOAT64) as valor_brl,
+    CAST(JSON_VALUE(_metadados.data_ingestao) AS TIMESTAMP) as data_ingestao,
+    JSON_VALUE(_metadados.origem) as origem
+  FROM json_data,
+  UNNEST(JSON_QUERY_ARRAY(prices)) as item
+)
+
+SELECT
+  data_referencia,
+  valor_brl,
+  origem,
+  data_ingestao,
+  ${utils.data_sp()} as data_processamento
+FROM flattened
+
+${when(incremental(), `WHERE data_ingestao > (SELECT MAX(data_ingestao) FROM ${self()})`)}
