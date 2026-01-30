@@ -2,12 +2,14 @@ config {
   type: "operations",
   schema: "raw",
   name: "raw_bitcoin",
-  tags: ["bitcoin"],
-  hasOutput: true,
-  description: "Leitura direta do Data Lake (Storage)"
+  hasOutput: true
 }
 
 CREATE OR REPLACE EXTERNAL TABLE ${self()}
+(
+  prices JSON,
+  _metadados JSON
+)
 OPTIONS (
   format = 'JSON',
   uris = ['gs://rrdata89_apis/raw/api_bitcoin/*']

@@ -2,18 +2,12 @@ config {
   type: "table",
   schema: "refined",
   name: "refined_bitcoin",
-  tags: ["bitcoin"],
-  columns: {
-    data_referencia: "Data da cotação",
-    valor_brl: "Valor em Reais",
-    variacao_valor: "Delta vs registro anterior"
-  }
+  tags: ["bitcoin"]
 }
 
 SELECT
   data_referencia,
   valor_brl,
-  valor_brl - LAG(valor_brl) OVER (ORDER BY data_referencia) as variacao_valor,
   data_processamento
 FROM ${ref("trusted_bitcoin")}
-QUALIFY ROW_NUMBER() OVER(PARTITION BY data_referencia ORDER BY data_processamento DESC) = 1
+ORDER BY data_referencia DESC
